@@ -1,3 +1,5 @@
+// Author: Nilanjan Das
+
 /* POLYGON TRIANGULATION ALGORITHM: O(nlogn)
 If the polygon is monotone, it can be triangulated in the following way:
 A polygon is L-monotone if all lines perpendicular to L intersect the polygon at atmost 2 points. Here we describe the triangulation of a y-monotone polygon (here L is the y-axis):
