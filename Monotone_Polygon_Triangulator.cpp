@@ -9,6 +9,7 @@ If the polygon is non-monotone, then we split the polygon into y-monotone subpol
 First, we find y-cusps of the polygon. A y-cusp is a reflex vertex such that its endpoints have y-coordinates either both less (down-y-cusp) or both more than its y-coordinate (up-y-cusp). Then, if it is a down-y-cusp, then we join it with its previous vertex in the sorted order, and if up-y-cusp, then we join it with its next vertex in the sorted order. There are O(n) cusps, and processing each cusp takes O(1) time. In this way, we divide the polygon into monotone subpolygons in O(n) time.
 So the algorithm takes O(nlogn) time for sorting vertices, O(n) time for monotone subdivision, O(n) time for monotone triangulation, resulting in worst case O(nlogn) overall time. (The monotone subdivision routine has not been done in the code, hence the following code can only triangulate a y-monotone polygon) */
 #include <iostream>
+#include <graphics.h>
 using namespace std;
 // structure of a polygon point
 struct Point {
@@ -188,9 +189,24 @@ Diagonal* triangulate_monotone (Point* polygon, Point* t_polygon, int n) {
 	}
 	return diag;
 }
+void draw (float polygon[][2], int triangulation[][2], int n) { // graphical visualization of the triangulation of the polygon using graphics.h library
+    int gd = DETECT, gm;
+    initgraph(&gd, &gm, "");
+    for (int i = 0; i < n - 1; i ++) { // here, the axes are mirrored over the X axis. So, the polygon visualized will also be a mirrored version
+        setcolor(1);
+        line(50 * polygon[i][0] + 10, 50 * polygon[i][1] + 10, 50 * polygon[i + 1][0] + 10, 50 * polygon[i + 1][1] + 10);
+    }
+    line(50 * polygon[n - 1][0] + 10, 50 * polygon[n - 1][1] + 10, 50 * polygon[0][0] + 10, 50 * polygon[0][1] + 10);
+    setcolor(2);
+    for (int i = 0; i < n - 3; i ++) {
+        line(50 * polygon[triangulation[i][0]][0] + 10, 50 * polygon[triangulation[i][0]][1] + 10, 50 * polygon[triangulation[i][1]][0] + 10, 50 * polygon[triangulation[i][1]][1] + 10);
+    }
+    getch(); // also, if the points get out of the boundary, for eg if it is negative or some very large value, then it cannot visualise it properly
+    closegraph();
+}
 int main () {
-	int n = 6;
-	float tt_polygon[n][2] = {{0,0},{2,1},{1,1},{2,2},{10,0},{5,-5}};
+	int n = 5;
+	float tt_polygon[n][2] = {{0,0},{2,1},{1,1},{2,2},{10,0}};
 	Point polygon[n], t_polygon[n];
 	for (int i = 0; i < n; i ++) {
 		polygon[i].idx = i;
@@ -200,7 +216,7 @@ int main () {
 	}
 	Diagonal* diag = triangulate_monotone (polygon, t_polygon, n);
 	Diagonal* t_diag = diag;
-	float triangulation[n-3][2];
+	int triangulation[n-3][2];
 	int i = 0;
 	while (t_diag != NULL) {
 		triangulation[i][0] = t_diag -> idx1;
@@ -208,8 +224,5 @@ int main () {
 		t_diag = t_diag -> next;
 		i ++;
 	}
-	cout << "Triangulation:\n";
-	for (int i = 0; i < n-3; i ++) {
-		cout << triangulation[i][0] << " " << triangulation[i][1] << "\n";
-	}
+	draw(tt_polygon, triangulation, n);
 }
