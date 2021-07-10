@@ -2,6 +2,7 @@
 /* POLYGON TRIANGULATION ALGORITHM: O(n^2)
 First, we generate all possible ears of the polygon. An ear of a polygon is a convex vertex such that the line segment joining the endpoints of the ear is an internal diagonal (i.e., it lies entirely inside the polygon, and no edge of the polygon intersects it). So, we need to iterate over all the vertices of the polygon, which takes O(n) time, and check if each vertex is an ear. This checking takes O(n) time for each vertex, as we need to check for intersecting edges. So, we get all ears in O(n^2) time, and there are O(n) ears. Now, we choose any ear, and join its endpoints by a diagonal, and remove that ear vertex from the polygon, and recursively do this triangulation process for the modified polygon. But, as soon as we process an ear, the ear-configuration of its endpoints may change, and to check that, we need to proceed similarly as we did before to check if a vertex of the polygon is an ear. So, for 2 endpoints, it takes O(2*n) = O(n) time, and if there is any change, our list of existing ears gets updated. We carry on the recursion with the modified set of ears, and the modified polygon, and hence, the whole triangulation completes in O(n^2) time. */
 #include <iostream>
+#include <graphics.h>
 using namespace std;
 int nn; // keeps track of number of unvisited vertices
 // structure of a polygon point
@@ -143,6 +144,21 @@ Diagonal* triangulate (Diagonal* diag, Point* polygon, int n, Ear* ear, bool* pr
 	diag = triangulate (diag, polygon, n, ear, present); // recursively triangulates the modified polygon
 	return diag;
 }
+void draw (float polygon[][2], int triangulation[][2], int n) { // graphical visualization of the triangulation of the polygon using graphics.h library
+    int gd = DETECT, gm;
+    initgraph(&gd, &gm, "");
+    for (int i = 0; i < n - 1; i ++) { // here, the axes are mirrored over the X axis. So, the polygon visualized will also be a mirrored version
+        setcolor(1);
+        line(50 * polygon[i][0] + 10, 50 * polygon[i][1] + 10, 50 * polygon[i + 1][0] + 10, 50 * polygon[i + 1][1] + 10);
+    }
+    line(50 * polygon[n - 1][0] + 10, 50 * polygon[n - 1][1] + 10, 50 * polygon[0][0] + 10, 50 * polygon[0][1] + 10);
+    setcolor(2);
+    for (int i = 0; i < n - 3; i ++) {
+        line(50 * polygon[triangulation[i][0]][0] + 10, 50 * polygon[triangulation[i][0]][1] + 10, 50 * polygon[triangulation[i][1]][0] + 10, 50 * polygon[triangulation[i][1]][1] + 10);
+    }
+    getch(); // also, if the points get out of the boundary, for eg if it is negative or some very large value, then it cannot visualise it properly
+    closegraph();
+}
 int main () {
 	int n = 4;
 	nn = n;
@@ -158,7 +174,7 @@ int main () {
 	Diagonal* diag = NULL;
 	diag = triangulate (diag, polygon, n, ear, present);
 	Diagonal* t_diag = diag;
-	float triangulation[n-3][2];
+	int triangulation[n-3][2];
 	int i = 0;
 	while (t_diag != NULL) {
 		triangulation[i][0] = t_diag -> idx1;
@@ -166,8 +182,5 @@ int main () {
 		t_diag = t_diag -> next;
 		i ++;
 	}
-	cout << "Triangulation:\n";
-	for (int i = 0; i < n-3; i ++) {
-		cout << triangulation[i][0] << " " << triangulation[i][1] << "\n";
-	}
+	draw(t_polygon, triangulation, n);
 }
